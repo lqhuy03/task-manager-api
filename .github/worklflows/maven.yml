@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-concurrency:
-  group: maven-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -25,26 +21,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Dùng Maven Wrapper thay vì mvn
       - name: Build & Test (mvnw)
         run: |
           chmod +x mvnw || true
           ./mvnw -B -ntp clean verify
-
-      # Báo cáo test (artifact để tải về khi cần)
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: |
-            **/target/surefire-reports/*
-            **/target/failsafe-reports/*
-
-      # (Tùy chọn) up file JAR
-      - name: Upload built jar
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: target/*.jar
